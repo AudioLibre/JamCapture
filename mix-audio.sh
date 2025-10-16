@@ -7,7 +7,7 @@ SAMPLE_RATE="48000"
 CHANNELS="2"
 
 # Default mix levels
-DEFAULT_GUITAR_VOLUME="1.5"    # Input channel volume (guitar/instrument)
+DEFAULT_GUITAR_VOLUME="7"    # Input channel volume (guitar/instrument)
 DEFAULT_OTHER_VOLUME="0.8"     # Output monitor volume (backing track/computer audio)
 
 # Function to display usage

@@ -19,5 +19,22 @@ SONG_NAME="$1"
 SCRIPT_DIR="$(dirname "$0")"
 
 # Record audio then mix it
-"$SCRIPT_DIR/record-audio.sh" "$SONG_NAME"
-"$SCRIPT_DIR/mix-audio.sh" "$SONG_NAME"
+echo "Starting recording phase..."
+if "$SCRIPT_DIR/record-audio.sh" "$SONG_NAME"; then
+    echo "Recording completed successfully"
+else
+    echo "Recording interrupted by user (Ctrl+C), checking if file was created..."
+fi
+
+# Check if recording file exists before mixing
+CLEAN_NAME=$(echo "$SONG_NAME" | sed 's/[^a-zA-Z0-9 ]//g' | tr ' ' '_')
+MKV_FILE="$HOME/${CLEAN_NAME}.mkv"
+
+if [ -f "$MKV_FILE" ]; then
+    echo "Recording file found, proceeding to mix..."
+    "$SCRIPT_DIR/mix-audio.sh" "$SONG_NAME"
+else
+    echo "Error: No recording file found at $MKV_FILE"
+    echo "Recording may have failed or been cancelled too early"
+    exit 1
+fi
