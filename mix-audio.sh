@@ -7,7 +7,7 @@ SAMPLE_RATE="48000"
 CHANNELS="2"
 
 # Default mix levels
-DEFAULT_GUITAR_VOLUME="7"    # Input channel volume (guitar/instrument)
+DEFAULT_GUITAR_VOLUME="1"    # Input channel volume (guitar/instrument)
 DEFAULT_OTHER_VOLUME="0.8"     # Output monitor volume (backing track/computer audio)
 
 # Function to display usage
@@ -35,8 +35,13 @@ OTHER_VOLUME="${3:-$DEFAULT_OTHER_VOLUME}"
 MIX_FILTER="[0:0]volume=${GUITAR_VOLUME}[guitar];[0:1]volume=${OTHER_VOLUME}[other];[guitar][other]amix=inputs=2:normalize=0"
 # Clean song name for filename (remove special characters, replace spaces with underscores)
 CLEAN_NAME=$(echo "$SONG_NAME" | sed 's/[^a-zA-Z0-9 ]//g' | tr ' ' '_')
-MKV_FILE="$HOME/${CLEAN_NAME}.mkv"
-FLAC_FILE="$HOME/${CLEAN_NAME}.flac"
+
+# Default output directory
+OUTPUT_DIR="$HOME/Audio/JamCapture"
+mkdir -p "$OUTPUT_DIR"
+
+MKV_FILE="$OUTPUT_DIR/${CLEAN_NAME}.mkv"
+FLAC_FILE="$OUTPUT_DIR/${CLEAN_NAME}.flac"
 
 echo "Song: $SONG_NAME"
 echo "Guitar volume: $GUITAR_VOLUME"
