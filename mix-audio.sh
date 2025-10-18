@@ -27,7 +27,11 @@ show_usage() {
 }
 
 # Get song name from argument or environment variable
-if [ -n "${JAMCAPTURE_SONG:-}" ]; then
+if [ -n "${JAMCAPTURE_SONG:-}" ] && [ $# -gt 0 ] && [ "$JAMCAPTURE_SONG" != "$1" ]; then
+    echo "Error: Conflicting song names - JAMCAPTURE_SONG='$JAMCAPTURE_SONG' vs argument='$1'"
+    echo "Please use either the environment variable OR the command line argument, not both with different values"
+    exit 1
+elif [ -n "${JAMCAPTURE_SONG:-}" ]; then
     SONG_NAME="$JAMCAPTURE_SONG"
     GUITAR_VOLUME="${1:-$DEFAULT_GUITAR_VOLUME}"
     OTHER_VOLUME="${2:-$DEFAULT_OTHER_VOLUME}"
