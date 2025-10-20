@@ -16,19 +16,30 @@ show_usage() {
 }
 
 # Get song name from argument or environment variable
-if [ -n "${JAMCAPTURE_SONG:-}" ] && [ $# -gt 0 ] && [ "$JAMCAPTURE_SONG" != "$1" ]; then
-    echo "Error: Conflicting song names - JAMCAPTURE_SONG='$JAMCAPTURE_SONG' vs argument='$1'"
-    echo "Please use either the environment variable OR the command line argument, not both with different values"
-    exit 1
+# Check if both JAMCAPTURE_SONG and first argument exist and are non-empty (potential conflict)
+if [ -n "${JAMCAPTURE_SONG:-}" ] && [ $# -gt 0 ] && [ -n "${1:-}" ]; then
+    # Both exist and are non-empty, check if they're different
+    if [ "$JAMCAPTURE_SONG" != "$1" ]; then
+        echo "Error: Conflicting song names - JAMCAPTURE_SONG='$JAMCAPTURE_SONG' vs argument='$1'"
+        echo "Please use either the environment variable OR the command line argument, not both with different values"
+        exit 1
+    else
+        # Both equal, use argument
+        SONG_NAME="$1"
+        OUTPUT_DIR="${2:-$HOME/Audio/JamCapture}"
+    fi
 elif [ -n "${JAMCAPTURE_SONG:-}" ]; then
+    # Only JAMCAPTURE_SONG exists
     SONG_NAME="$JAMCAPTURE_SONG"
     OUTPUT_DIR="${1:-$HOME/Audio/JamCapture}"
-elif [ $# -eq 0 ]; then
-    echo "Error: Please provide a song name or set JAMCAPTURE_SONG environment variable"
-    show_usage
-else
+elif [ $# -gt 0 ] && [ -n "${1:-}" ]; then
+    # Only argument exists
     SONG_NAME="$1"
     OUTPUT_DIR="${2:-$HOME/Audio/JamCapture}"
+else
+    # Neither exists
+    echo "Error: Please provide a song name or set JAMCAPTURE_SONG environment variable"
+    show_usage
 fi
 
 SCRIPT_DIR="$(dirname "$0")"

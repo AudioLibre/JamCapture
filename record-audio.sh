@@ -22,19 +22,18 @@ show_usage() {
 }
 
 # Get song name from argument or environment variable
-if [ -n "${JAMCAPTURE_SONG:-}" ] && [ $# -gt 0 ] && [ "$JAMCAPTURE_SONG" != "$1" ]; then
-    echo "Error: Conflicting song names - JAMCAPTURE_SONG='$JAMCAPTURE_SONG' vs argument='$1'"
-    echo "Please use either the environment variable OR the command line argument, not both with different values"
-    exit 1
-elif [ -n "${JAMCAPTURE_SONG:-}" ]; then
+if [ -n "${JAMCAPTURE_SONG:-}" ]; then
+    # JAMCAPTURE_SONG is set, use it as song name
     SONG_NAME="$JAMCAPTURE_SONG"
     OUTPUT_DIR="${1:-$HOME/Audio/JamCapture}"
-elif [ $# -eq 0 ]; then
-    echo "Error: Please provide a song name or set JAMCAPTURE_SONG environment variable"
-    show_usage
-else
+elif [ $# -gt 0 ] && [ -n "${1:-}" ]; then
+    # No JAMCAPTURE_SONG, use first argument as song name
     SONG_NAME="$1"
     OUTPUT_DIR="${2:-$HOME/Audio/JamCapture}"
+else
+    # Neither exists
+    echo "Error: Please provide a song name or set JAMCAPTURE_SONG environment variable"
+    show_usage
 fi
 
 # Create output directory if it doesn't exist
@@ -57,7 +56,8 @@ echo "Press Ctrl+C to stop recording"
 ffmpeg \
     -f pulse -i "$SCARLETT_INPUT" \
     -f pulse -i "$SCARLETT_OUTPUT" \
-    -map 0:a -map 1:a -c:a flac -ar "$SAMPLE_RATE" -ac "$CHANNELS" \
+    -filter_complex "[0]pan=stereo|c0=0.5*c0+0.5*c1|c1=0.5*c0+0.5*c1[guitar];[1]acopy[backing]" \
+    -map "[guitar]" -map "[backing]" -c:a flac -ar "$SAMPLE_RATE" \
     "$MKV_FILE" &
 
 FFMPEG_PID=$!

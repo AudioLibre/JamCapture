@@ -27,23 +27,22 @@ show_usage() {
 }
 
 # Get song name from argument or environment variable
-if [ -n "${JAMCAPTURE_SONG:-}" ] && [ $# -gt 0 ] && [ "$JAMCAPTURE_SONG" != "$1" ]; then
-    echo "Error: Conflicting song names - JAMCAPTURE_SONG='$JAMCAPTURE_SONG' vs argument='$1'"
-    echo "Please use either the environment variable OR the command line argument, not both with different values"
-    exit 1
-elif [ -n "${JAMCAPTURE_SONG:-}" ]; then
+if [ -n "${JAMCAPTURE_SONG:-}" ]; then
+    # JAMCAPTURE_SONG is set, use it as song name
     SONG_NAME="$JAMCAPTURE_SONG"
     GUITAR_VOLUME="${1:-$DEFAULT_GUITAR_VOLUME}"
     OTHER_VOLUME="${2:-$DEFAULT_OTHER_VOLUME}"
     OUTPUT_DIR="${3:-$HOME/Audio/JamCapture}"
-elif [ $# -eq 0 ]; then
-    echo "Error: Please provide a song name or set JAMCAPTURE_SONG environment variable"
-    show_usage
-else
+elif [ $# -gt 0 ] && [ -n "${1:-}" ]; then
+    # No JAMCAPTURE_SONG, use first argument as song name
     SONG_NAME="$1"
     GUITAR_VOLUME="${2:-$DEFAULT_GUITAR_VOLUME}"
     OTHER_VOLUME="${3:-$DEFAULT_OTHER_VOLUME}"
     OUTPUT_DIR="${4:-$HOME/Audio/JamCapture}"
+else
+    # Neither exists
+    echo "Error: Please provide a song name or set JAMCAPTURE_SONG environment variable"
+    show_usage
 fi
 
 MIX_FILTER="[0:0]volume=${GUITAR_VOLUME}[guitar];[0:1]volume=${OTHER_VOLUME}[other];[guitar][other]amix=inputs=2:normalize=0"
