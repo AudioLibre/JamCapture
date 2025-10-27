@@ -64,3 +64,8 @@ else
     echo "Recording may have failed or been cancelled too early"
     exit 1
 fi
+
+vlc --play-and-exit "$OUTPUT_DIR/${CLEAN_NAME}.flac" || {
+    echo "Error: Failed to play the mixed audio file"
+    exit 1
+}

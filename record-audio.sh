@@ -4,9 +4,15 @@ set -euxo pipefail
 
 # Configuration parameters
 SCARLETT_INPUT="alsa_input.usb-Focusrite_Scarlett_2i2_USB_Y814JK8264026F-00.analog-stereo"
-SCARLETT_OUTPUT="alsa_output.usb-Focusrite_Scarlett_2i2_USB_Y814JK8264026F-00.analog-stereo.monitor"
 SAMPLE_RATE="48000"
 CHANNELS="2"
+
+# Get default system audio output monitor
+DEFAULT_SINK=$(pactl get-default-sink)
+DEFAULT_OUTPUT_MONITOR="${DEFAULT_SINK}.monitor"
+
+echo "Using Scarlett input: $SCARLETT_INPUT"
+echo "Using default system output monitor: $DEFAULT_OUTPUT_MONITOR"
 
 # Function to display usage
 show_usage() {
@@ -55,7 +61,7 @@ echo "Press Ctrl+C to stop recording"
 # Start FFmpeg recording in background
 ffmpeg \
     -f pulse -i "$SCARLETT_INPUT" \
-    -f pulse -i "$SCARLETT_OUTPUT" \
+    -f pulse -i "$DEFAULT_OUTPUT_MONITOR" \
     -filter_complex "[0]pan=stereo|c0=0.5*c0+0.5*c1|c1=0.5*c0+0.5*c1[guitar];[1]acopy[backing]" \
     -map "[guitar]" -map "[backing]" -c:a flac -ar "$SAMPLE_RATE" \
     "$MKV_FILE" &
