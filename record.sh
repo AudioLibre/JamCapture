@@ -58,7 +58,7 @@ MKV_FILE="$OUTPUT_DIR/${CLEAN_NAME}.mkv"
 
 if [ -f "$MKV_FILE" ]; then
     echo "Recording file found, proceeding to mix..."
-    JAMCAPTURE_SONG="$SONG_NAME" "$SCRIPT_DIR/mix-audio.sh" "" "" "$OUTPUT_DIR"
+    JAMCAPTURE_SONG="$SONG_NAME" "$SCRIPT_DIR/mix-audio.sh" -o "$OUTPUT_DIR"
 else
     echo "Error: No recording file found at $MKV_FILE"
     echo "Recording may have failed or been cancelled too early"
