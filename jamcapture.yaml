@@ -1,0 +1,16 @@
+audio:
+  sample_rate: 48000
+  channels: 2
+
+record:
+  guitar_input: "alsa_input.pci-0000_00_1f.3-platform-sof_sdw.HiFi__hw_sofsoundwire_1__source"
+  monitor_input: ""  # Auto-detect if empty
+
+mix:
+  guitar_volume: 4.0
+  backing_volume: 0.8
+  delay_ms: 200  # Default Bluetooth compensation
+
+output:
+  directory: "~/Audio/JamCapture"
+  format: "flac"
