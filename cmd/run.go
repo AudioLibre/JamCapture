@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"jamcapture/internal/mix"
-	"jamcapture/internal/play"
-	"jamcapture/internal/record"
+	"github.com/audiolibre/jamcapture/internal/mix"
+	"github.com/audiolibre/jamcapture/internal/play"
+	"github.com/audiolibre/jamcapture/internal/record"
 	"strings"
 
 	"github.com/spf13/cobra"

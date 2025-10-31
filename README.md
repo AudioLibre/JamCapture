@@ -39,6 +39,16 @@ output:
   format: "flac"
 ```
 
+### Pre-configured Templates
+
+The project includes several configuration templates in `jamcapture-go/`:
+
+- **`jamcapture-scarlett.yaml`**: Focusrite Scarlett setup with 200ms Bluetooth delay
+- **`jamcapture-wired.yaml`**: Scarlett setup with no delay (wired speakers)
+- **`jamcapture-quiet.yaml`**: Lower volumes for quiet practice sessions
+
+Use with: `jamcapture --config jamcapture-go/jamcapture-scarlett.yaml -p rmp "song"`
+
 ## Usage
 
 ### Simplified Syntax (Recommended)

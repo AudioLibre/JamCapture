@@ -2,7 +2,7 @@ package mix
 
 import (
 	"fmt"
-	"jamcapture/internal/config"
+	"github.com/audiolibre/jamcapture/internal/config"
 	"os"
 	"os/exec"
 	"path/filepath"

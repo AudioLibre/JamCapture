@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"jamcapture/internal/config"
+	"github.com/audiolibre/jamcapture/internal/config"
 
 	"github.com/spf13/cobra"
 )
@@ -27,8 +27,12 @@ then mixing them with customizable volume levels and delay compensation.
 When a song name is provided, it acts as 'jamcapture run [song-name]'.`,
 	Args: cobra.MaximumNArgs(1),
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		if cfgFile == "" {
+			return fmt.Errorf("config file required, use --config flag")
+		}
+
 		var err error
-		cfg, err = config.Load()
+		cfg, err = config.Load(cfgFile)
 		if err != nil {
 			return fmt.Errorf("failed to load config: %w", err)
 		}

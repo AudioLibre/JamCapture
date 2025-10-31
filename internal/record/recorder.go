@@ -2,8 +2,8 @@ package record
 
 import (
 	"fmt"
-	"jamcapture/internal/audio"
-	"jamcapture/internal/config"
+	"github.com/audiolibre/jamcapture/internal/audio"
+	"github.com/audiolibre/jamcapture/internal/config"
 	"os"
 	"os/exec"
 	"os/signal"

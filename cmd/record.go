@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"jamcapture/internal/record"
+	"github.com/audiolibre/jamcapture/internal/record"
 
 	"github.com/spf13/cobra"
 )

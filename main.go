@@ -1,6 +1,6 @@
 package main
 
-import "jamcapture/cmd"
+import "github.com/audiolibre/jamcapture/cmd"
 
 func main() {
 	cmd.Execute()

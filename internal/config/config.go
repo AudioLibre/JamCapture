@@ -57,29 +57,20 @@ var defaultConfig = Config{
 	},
 }
 
-func Load() (*Config, error) {
-	viper.SetConfigName("jamcapture")
-	viper.SetConfigType("yaml")
+func Load(configFile string) (*Config, error) {
+	if configFile == "" {
+		return nil, fmt.Errorf("no config file specified, use --config flag")
+	}
 
-	// Add config search paths
-	homeDir, _ := os.UserHomeDir()
-	viper.AddConfigPath(filepath.Join(homeDir, ".config"))
-	viper.AddConfigPath(".")
+	viper.SetConfigFile(configFile)
 
 	// Set environment variable prefix
 	viper.SetEnvPrefix("JAMCAPTURE")
 	viper.AutomaticEnv()
 
-	// Set defaults
-	setDefaults()
-
 	// Read config file
 	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			// Config file not found, create one
-			return createDefaultConfig()
-		}
-		return nil, fmt.Errorf("error reading config: %w", err)
+		return nil, fmt.Errorf("error reading config file %s: %w", configFile, err)
 	}
 
 	var config Config
@@ -93,38 +84,6 @@ func Load() (*Config, error) {
 	return &config, nil
 }
 
-func setDefaults() {
-	viper.SetDefault("audio.sample_rate", defaultConfig.Audio.SampleRate)
-	viper.SetDefault("audio.channels", defaultConfig.Audio.Channels)
-	viper.SetDefault("record.guitar_input", defaultConfig.Record.GuitarInput)
-	viper.SetDefault("record.monitor_input", defaultConfig.Record.MonitorInput)
-	viper.SetDefault("mix.guitar_volume", defaultConfig.Mix.GuitarVolume)
-	viper.SetDefault("mix.backing_volume", defaultConfig.Mix.BackingVolume)
-	viper.SetDefault("mix.delay_ms", defaultConfig.Mix.DelayMs)
-	viper.SetDefault("output.directory", defaultConfig.Output.Directory)
-	viper.SetDefault("output.format", defaultConfig.Output.Format)
-}
-
-func createDefaultConfig() (*Config, error) {
-	homeDir, _ := os.UserHomeDir()
-	configDir := filepath.Join(homeDir, ".config")
-
-	// Create config directory if it doesn't exist
-	if err := os.MkdirAll(configDir, 0755); err != nil {
-		return nil, fmt.Errorf("error creating config directory: %w", err)
-	}
-
-	configPath := filepath.Join(configDir, "jamcapture.yaml")
-
-	// Write default config
-	viper.SetConfigFile(configPath)
-	if err := viper.WriteConfig(); err != nil {
-		return nil, fmt.Errorf("error writing default config: %w", err)
-	}
-
-	fmt.Printf("Created default config at: %s\n", configPath)
-	return &defaultConfig, nil
-}
 
 func (c *Config) Save() error {
 	return viper.WriteConfig()
