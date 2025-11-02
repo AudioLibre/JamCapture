@@ -1,0 +1,61 @@
+active_config: "studio"
+
+configs:
+  default:
+    audio:
+      sample_rate: 48000
+      channels: 2
+    record:
+      guitar_input: "alsa_input.usb-Focusrite_Scarlett_2i2_USB_Y814JK8264026F-00.analog-stereo"
+      monitor_input: ""  # Auto-detect if empty
+    mix:
+      guitar_volume: 4.0
+      backing_volume: 0.8
+      delay_ms: 200  # Default Bluetooth compensation
+    output:
+      directory: "~/Audio/JamCapture"
+      format: "flac"
+
+  studio:
+    mix:
+      guitar_volume: 3.5
+      delay_ms: 180
+
+  live:
+    audio:
+      sample_rate: 44100
+    record:
+      guitar_input: "alsa_input.usb-Focusrite_Scarlett_2i2_USB_Y814JK8264026F-00.analog-stereo"
+    mix:
+      guitar_volume: 2.0
+      backing_volume: 1.2
+      delay_ms: 150
+    output:
+      directory: "~/Audio/Live"
+      format: "wav"
+
+  bluetooth:
+    mix:
+      delay_ms: 250
+    output:
+      directory: "~/Audio/Bluetooth"
+
+  carla:
+    record:
+      guitar_input: "Carla:output_0"  # Standard mode, use Carla-Patchbay_X:audio-out1 for Patchbay mode
+    mix:
+      guitar_volume: 3.0
+      backing_volume: 0.8  # Explicit to override default
+      delay_ms: -999  # Special value to force 0 (Carla handles latency internally)
+    output:
+      directory: "~/Audio/Carla"
+
+  carla-patchbay:
+    record:
+      guitar_input: "Carla-Patchbay:audio-out1"  # Patchbay mode format
+    mix:
+      guitar_volume: 3.0
+      backing_volume: 0.8
+      delay_ms: -999
+    output:
+      directory: "~/Audio/Carla"
