@@ -33,8 +33,9 @@ When a song name is provided, it acts as 'jamcapture run [song-name]'.`,
 			return nil
 		}
 
+		// Use default config path if not specified
 		if cfgFile == "" {
-			return fmt.Errorf("config file required, use --config flag")
+			cfgFile = os.ExpandEnv("$HOME/.config/jamcapture.yaml")
 		}
 
 		var err error
