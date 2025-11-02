@@ -30,6 +30,7 @@ func (p *PulseAudio) GetDefaultSinkMonitor() (string, error) {
 }
 
 func (p *PulseAudio) ListSources() ([]string, error) {
+	// Get PulseAudio sources
 	cmd := exec.Command("pactl", "list", "short", "sources")
 	output, err := cmd.Output()
 	if err != nil {
@@ -46,6 +47,46 @@ func (p *PulseAudio) ListSources() ([]string, error) {
 			}
 		}
 	}
+
+	// Add PipeWire/JACK sources (like Carla)
+	pwSources, err := p.listPipeWireSources()
+	if err == nil {
+		sources = append(sources, pwSources...)
+	}
+
+	return sources, nil
+}
+
+func (p *PulseAudio) listPipeWireSources() ([]string, error) {
+	cmd := exec.Command("pw-cli", "list-objects")
+	output, err := cmd.Output()
+	if err != nil {
+		// PipeWire not available or pw-cli not found
+		return nil, err
+	}
+
+	var sources []string
+	lines := strings.Split(string(output), "\n")
+
+	for _, line := range lines {
+		// Look for Carla or JACK audio outputs that can be used as sources
+		if strings.Contains(line, "object.path") &&
+		   (strings.Contains(line, "Carla") || strings.Contains(line, "JACK")) {
+			// Extract the port name from object.path = "..."
+			if start := strings.Index(line, `"`); start != -1 {
+				if end := strings.Index(line[start+1:], `"`); end != -1 {
+					portName := line[start+1 : start+1+end]
+					// Add both Carla formats: Carla:output_X and Carla-Patchbay_X:output_X
+					// Also check for audio-out patterns for Patchbay mode
+					if (strings.Contains(portName, "output") && !strings.Contains(portName, "events")) ||
+					   strings.Contains(portName, "audio-out") {
+						sources = append(sources, portName)
+					}
+				}
+			}
+		}
+	}
+
 	return sources, nil
 }
 

@@ -10,9 +10,10 @@ import (
 )
 
 var (
-	cfg      *config.Config
-	cfgFile  string
-	pipeline string
+	cfg       *config.Config
+	cfgFile   string
+	pipeline  string
+	profile   string
 )
 
 var rootCmd = &cobra.Command{
@@ -27,12 +28,17 @@ then mixing them with customizable volume levels and delay compensation.
 When a song name is provided, it acts as 'jamcapture run [song-name]'.`,
 	Args: cobra.MaximumNArgs(1),
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		// Skip config loading for sources command
+		if cmd.Name() == "sources" {
+			return nil
+		}
+
 		if cfgFile == "" {
 			return fmt.Errorf("config file required, use --config flag")
 		}
 
 		var err error
-		cfg, err = config.Load(cfgFile)
+		cfg, err = config.LoadWithProfile(cfgFile, profile)
 		if err != nil {
 			return fmt.Errorf("failed to load config: %w", err)
 		}
@@ -64,6 +70,7 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/jamcapture.yaml)")
 	rootCmd.PersistentFlags().StringVarP(&pipeline, "pipeline", "p", "", "pipeline steps: r=record, m=mix, p=play (e.g., 'rmp', 'mp', 'rm')")
+	rootCmd.PersistentFlags().StringVar(&profile, "profile", "", "configuration profile to use (overrides active_config from file)")
 
 	// Add flags for direct song execution
 	rootCmd.Flags().Float64P("guitar-volume", "g", 0, "guitar volume (overrides config)")

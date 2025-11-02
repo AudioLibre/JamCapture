@@ -9,6 +9,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+type RootConfig struct {
+	ActiveConfig string                 `mapstructure:"active_config" yaml:"active_config"`
+	Configs      map[string]*Config     `mapstructure:"configs" yaml:"configs"`
+}
+
 type Config struct {
 	Audio  AudioConfig  `mapstructure:"audio" yaml:"audio"`
 	Record RecordConfig `mapstructure:"record" yaml:"record"`
@@ -58,6 +63,10 @@ var defaultConfig = Config{
 }
 
 func Load(configFile string) (*Config, error) {
+	return LoadWithProfile(configFile, "")
+}
+
+func LoadWithProfile(configFile, profile string) (*Config, error) {
 	if configFile == "" {
 		return nil, fmt.Errorf("no config file specified, use --config flag")
 	}
@@ -73,20 +82,94 @@ func Load(configFile string) (*Config, error) {
 		return nil, fmt.Errorf("error reading config file %s: %w", configFile, err)
 	}
 
-	var config Config
-	if err := viper.Unmarshal(&config); err != nil {
+	var rootConfig RootConfig
+	if err := viper.Unmarshal(&rootConfig); err != nil {
 		return nil, fmt.Errorf("error unmarshaling config: %w", err)
 	}
 
-	// Expand tilde in output directory
-	config.Output.Directory = expandPath(config.Output.Directory)
+	// Determine which config to use
+	configName := profile
+	if configName == "" {
+		configName = rootConfig.ActiveConfig
+	}
+	if configName == "" {
+		configName = "default"
+	}
 
-	return &config, nil
+	// Get the requested config
+	selectedConfig, exists := rootConfig.Configs[configName]
+	if !exists {
+		return nil, fmt.Errorf("configuration profile '%s' not found", configName)
+	}
+
+	// Merge with default config if it exists and we're not already using default
+	if configName != "default" {
+		if defaultConfig, exists := rootConfig.Configs["default"]; exists {
+			selectedConfig = mergeConfigs(defaultConfig, selectedConfig)
+		}
+	}
+
+	// Expand tilde in output directory
+	selectedConfig.Output.Directory = expandPath(selectedConfig.Output.Directory)
+
+	return selectedConfig, nil
 }
 
 
 func (c *Config) Save() error {
 	return viper.WriteConfig()
+}
+
+func mergeConfigs(base, override *Config) *Config {
+	result := &Config{}
+
+	// Start with base config
+	if base != nil {
+		*result = *base
+	}
+
+	// Override with non-zero values from override config
+	if override != nil {
+		// Audio config
+		if override.Audio.SampleRate != 0 {
+			result.Audio.SampleRate = override.Audio.SampleRate
+		}
+		if override.Audio.Channels != 0 {
+			result.Audio.Channels = override.Audio.Channels
+		}
+
+		// Record config
+		if override.Record.GuitarInput != "" {
+			result.Record.GuitarInput = override.Record.GuitarInput
+		}
+		if override.Record.MonitorInput != "" {
+			result.Record.MonitorInput = override.Record.MonitorInput
+		}
+
+		// Mix config - use different logic for DelayMs to allow 0 values
+		if override.Mix.GuitarVolume != 0 {
+			result.Mix.GuitarVolume = override.Mix.GuitarVolume
+		}
+		if override.Mix.BackingVolume != 0 {
+			result.Mix.BackingVolume = override.Mix.BackingVolume
+		}
+		// For DelayMs, handle special case where -999 means force to 0
+		if override.Mix.DelayMs == -999 {
+			result.Mix.DelayMs = 0
+		} else if override.Mix.DelayMs != 0 {
+			result.Mix.DelayMs = override.Mix.DelayMs
+		}
+
+		// Output config
+		if override.Output.Directory != "" {
+			result.Output.Directory = override.Output.Directory
+		}
+		if override.Output.Format != "" {
+			result.Output.Format = override.Output.Format
+		}
+	}
+
+	return result
 }
 
 func expandPath(path string) string {
